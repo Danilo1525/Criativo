@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Poppins:wght@300&display=swap" rel="stylesheet">
+  <!-- A biblioteca html2canvas é usada para a funcionalidade de guardar como imagem -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     :root {
@@ -69,6 +70,7 @@
       height: 350px;
       transition: transform 1.5s cubic-bezier(0.6, -0.28, 0.73, 0.04);
       z-index: 10;
+      cursor: pointer;
     }
 
     .corpo-garrafa {
@@ -318,14 +320,14 @@
         html2canvas(document.body, {
             backgroundColor: getComputedStyle(document.body).backgroundColor,
             useCORS: true,
-            scale: 2
+            scale: 2 // Melhora a resolução da imagem
         }).then(canvas => {
             const link = document.createElement('a');
             link.download = 'desejo-etereo.png';
             link.href = canvas.toDataURL('image/png');
             link.click();
             
-            // Mostra os botões novamente
+            // Mostra os botões novamente após a captura
             botoes.style.display = 'flex';
         });
     });
