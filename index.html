@@ -3,35 +3,51 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mensagens Aleatórias</title>
+  <title>Mensagens Misteriosas</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Poppins:wght@300&display=swap" rel="stylesheet">
-  <!-- A biblioteca html2canvas é usada para a funcionalidade de guardar como imagem -->
+  <!-- Bibliotecas para som e imagem -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     :root {
-      --bg: #0C001F;
-      --glass-tint: rgba(150, 120, 220, 0.05);
-      --glass-border: rgba(255, 255, 255, 0.2);
+      --bg: #110E1B;
       --text-light: #F0E8FF;
-      --accent-gold: #FFD700;
-      --smoke-1: #9B5DE5;
-      --smoke-2: #F15BB5;
-      --smoke-3: #00BBF9;
+      --duration-fast: 0.8s;
+      --duration-slow: 1.5s;
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    /* --- TEMA DESTINO --- */
+    .theme-destino {
+      --glow-color: rgba(255, 100, 80, 0.2);
+      --accent-color: #FF6347; /* Tomate */
+      --particle-1: #FF4500;
+      --particle-2: #FFD700;
+      --particle-3: #CD5C5C;
     }
+    
+    /* --- TEMA SABEDORIA --- */
+    .theme-sabedoria {
+      --glow-color: rgba(0, 191, 255, 0.2);
+      --accent-color: #87CEFA; /* Azul Céu Claro */
+      --particle-1: #00BFFF;
+      --particle-2: #E0FFFF;
+      --particle-3: #48D1CC;
+    }
+    
+    /* --- TEMA SONHOS --- */
+    .theme-sonhos {
+      --glow-color: rgba(218, 112, 214, 0.2);
+      --accent-color: #EE82EE; /* Violeta */
+      --particle-1: #DA70D6;
+      --particle-2: #F15BB5;
+      --particle-3: #FFC0CB;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
       height: 100vh;
       background-color: var(--bg);
       font-family: 'Poppins', sans-serif;
@@ -40,257 +56,398 @@
       position: relative;
     }
     
+    .tela {
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      position: absolute; width: 100%; height: 100%;
+      transition: opacity var(--duration-fast) ease-in-out, transform var(--duration-fast) ease-in-out;
+      text-align: center;
+      padding: 1.5rem;
+    }
+
+    .tela.hidden { opacity: 0; pointer-events: none; transform: scale(0.95); }
+
     #background-glow {
-        position: absolute;
-        width: 100vw;
-        height: 100vh;
-        background: radial-gradient(ellipse at 50% 50%, rgba(155, 93, 229, 0.2) 0%, transparent 70%);
-        animation: pulse-glow 10s infinite ease-in-out;
+        position: absolute; width: 100vw; height: 100vh;
+        background: radial-gradient(ellipse at 50% 50%, var(--glow-color, transparent) 0%, transparent 70%);
+        animation: pulse-glow 12s infinite ease-in-out;
+        transition: background var(--duration-fast) ease;
     }
     
     @keyframes pulse-glow {
-        0%, 100% { transform: scale(1); opacity: 0.2; }
-        50% { transform: scale(1.2); opacity: 0.3; }
+        0%, 100% { transform: scale(1); opacity: 0.7; }
+        50% { transform: scale(1.2); opacity: 1; }
     }
 
-    /* --- Container Principal --- */
-    .container {
-      position: relative;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 100%;
-      height: 100%;
+    /* --- TELA INÍCIO --- */
+    #tela-inicio {
+        background: rgba(0,0,0,0.3); backdrop-filter: blur(10px);
+        cursor: pointer; z-index: 100;
+    }
+    #tela-inicio h1 {
+        font-family: 'Cormorant Garamond', serif; font-size: clamp(2.5rem, 8vw, 4rem); font-weight: 600;
+        text-shadow: 0 0 15px var(--text-light);
     }
 
-    /* --- A Garrafa --- */
-    #garrafa {
-      position: absolute;
-      width: 220px;
-      height: 350px;
-      transition: transform 1.5s cubic-bezier(0.6, -0.28, 0.73, 0.04);
-      z-index: 10;
-      cursor: pointer;
+    /* --- TELA SELEÇÃO --- */
+    #tela-selecao { perspective: 1200px; }
+    #tela-selecao h2 {
+        font-family: 'Cormorant Garamond', serif; font-size: clamp(2rem, 6vw, 2.5rem);
+        margin-bottom: 4rem;
     }
-
-    .corpo-garrafa {
-      width: 100%;
-      height: 100%;
-      background: var(--glass-tint);
-      border: 1px solid var(--glass-border);
-      border-radius: 90px 90px 20px 20px;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      clip-path: polygon(25% 0, 75% 0, 100% 30%, 100% 100%, 0 100%, 0 30%);
-      position: relative;
-      box-shadow: inset 0 0 20px rgba(255,255,255,0.05);
+    #baus {
+        display: flex; gap: 3rem; flex-wrap: wrap; justify-content: center;
     }
-
-    #rolha {
-      position: absolute;
-      top: -28px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 60px;
-      height: 40px;
-      background: #A98A72;
-      border-radius: 10px 10px 5px 5px;
-      border: 1px solid #7B5E4A;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    .bau-selecao { cursor: pointer; text-align: center; transition: transform 0.4s ease; }
+    .bau-selecao:hover { transform: scale(1.05); }
+    .bau-icone {
+        width: 120px; height: 90px;
+        background: #5C3D20; border: 2px solid #855B32;
+        border-radius: 10px; position: relative;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.4), inset 0 2px 3px rgba(255,255,255,0.1);
+        animation: float 6s infinite ease-in-out;
+    }
+    .bau-icone::before { /* Tampa */
+        content: ''; position: absolute;
+        width: 100%; height: 30px; top: -15px; left: -2px;
+        background: #6D4C33; border: 2px solid #855B32;
+        border-radius: 10px 10px 0 0;
+    }
+    .bau-icone::after { /* Fechadura */
+        content: ''; position: absolute;
+        width: 15px; height: 15px; top: -5px; left: 50%;
+        transform: translateX(-50%);
+        background: var(--accent-color); border-radius: 50%;
+        box-shadow: 0 0 10px var(--accent-color);
+    }
+    .bau-selecao p { margin-top: 1rem; font-weight: 300; }
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-15px); }
+    }
+    
+    /* --- TELA ANIMAÇÃO --- */
+    #main-container { perspective: 1200px; }
+    
+    #bau {
+      position: absolute; width: 220px; height: 150px;
+      z-index: 10; transform-style: preserve-3d;
+      transition: transform var(--duration-slow) cubic-bezier(0.6, -0.28, 0.73, 0.04);
+    }
+    .base-bau {
+      width: 100%; height: 100%;
+      background: #5C3D20; border: 3px solid #855B32;
+      border-radius: 10px; position: relative;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5), inset 0 5px 5px rgba(255,255,255,0.1);
+    }
+    .tampa-bau {
+      content: ''; position: absolute;
+      width: 100%; height: 50px; top: 0; left: 0;
+      background: #6D4C33; border: 3px solid #855B32;
+      border-radius: 10px 10px 0 0;
+      transform-origin: top;
       transition: transform 1s cubic-bezier(0.34, 1.56, 0.64, 1);
-      z-index: 15;
+    }
+    
+    #particulas-container {
+        position: absolute; bottom: 20px; left: 50%;
+        transform: translateX(-50%); width: 100px; height: 100px;
+    }
+    .particula-magica {
+        position: absolute; border-radius: 50%;
+        filter: blur(10px); opacity: 0.7;
+    }
+    .p1 { width: 80px; height: 80px; background: var(--particle-1); }
+    .p2 { width: 60px; height: 60px; background: var(--particle-2); }
+    .p3 { width: 100px; height: 100px; background: var(--particle-3); }
+
+    /* --- CARTA DE TARÔ --- */
+    #card-container {
+      position: absolute;
+      width: 300px; height: 480px;
+      opacity: 0; pointer-events: none;
+      transform: scale(0.9);
+      transition: opacity var(--duration-fast) ease, transform var(--duration-fast) ease;
+      transition-delay: 0.8s;
+      z-index: 20;
+    }
+    #card-inner {
+      width: 100%; height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 1s cubic-bezier(0.77, 0, 0.175, 1);
+    }
+    #card-container.virado #card-inner {
+      transform: rotateY(180deg);
+    }
+    .card-face {
+      position: absolute; width: 100%; height: 100%;
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      border-radius: 20px;
+      background: linear-gradient(160deg, #2A214A, #1A1438);
+      border: 2px solid var(--accent-color);
+      box-shadow: 0 0 30px -5px var(--accent-color);
+      overflow: hidden;
+    }
+    #card-verso::before { /* Borda animada SÓ NO VERSO */
+        content: '';
+        position: absolute;
+        top: 50%; left: 50%;
+        width: 150%; height: 250%;
+        background: conic-gradient(transparent, var(--accent-color), transparent 30%);
+        animation: rotate-border 6s linear infinite;
+        transform-origin: center center;
+    }
+    @keyframes rotate-border { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
+    
+    #card-verso {
+      display: flex; justify-content: center; align-items: center; cursor: pointer;
+      box-shadow: 0 0 30px -5px var(--accent-color), inset 0 0 40px rgba(0,0,0,0.5);
+    }
+    #verso-particles { position: absolute; transition: transform 0.1s ease-out; }
+    .particle { position: absolute; width: 3px; height: 3px; background: var(--text-light); border-radius: 50%; box-shadow: 0 0 8px var(--text-light); }
+    #card-verso svg { stroke: var(--accent-color); opacity: 0.8; z-index: 2; }
+    
+    #card-frente {
+      transform: rotateY(180deg);
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      padding: 2.5rem 2rem;
+    }
+    #card-icon { flex-shrink: 0; margin-bottom: 1.5rem; }
+    #card-icon svg { width: 50px; height: 50px; stroke: var(--accent-color); fill: none; opacity: 0.9; }
+    #texto-mensagem {
+      font-family: 'Cormorant Garamond', serif; font-size: 1.7rem;
+      font-weight: 600; line-height: 1.4;
+      text-shadow: 0 0 10px var(--accent-color);
+      color: var(--text-light);
+      flex-grow: 1; display: flex; align-items: center;
     }
 
-    /* --- Fumo Mágico --- */
-    #fumo-container {
-        position: absolute;
-        bottom: 20px;
+    /* --- Botões e Feedback --- */
+    #botoes-acao {
+        display: flex; gap: 1rem; justify-content: center;
+        position: fixed; /* MUDANÇA: Fixo na tela */
+        bottom: 30px;
         left: 50%;
         transform: translateX(-50%);
-        width: 100px;
-        height: 100px;
-    }
-
-    .particula-fumo {
-        position: absolute;
-        border-radius: 50%;
-        filter: blur(15px);
-        opacity: 0;
-        animation-name: swirl;
-        animation-iteration-count: infinite;
-        animation-timing-function: ease-in-out;
-    }
-    
-    .p1 { width: 80px; height: 80px; background: var(--smoke-1); animation-duration: 8s; animation-delay: 0s; }
-    .p2 { width: 60px; height: 60px; background: var(--smoke-2); animation-duration: 7s; animation-delay: 1s; }
-    .p3 { width: 100px; height: 100px; background: var(--smoke-3); animation-duration: 9s; animation-delay: 2s; }
-
-    @keyframes swirl {
-        0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.5; }
-        25% { transform: translate(20px, -40px) scale(0.8); opacity: 0.7; }
-        50% { transform: translate(-20px, -80px) scale(1.2); opacity: 0.4; }
-        75% { transform: translate(10px, -120px) scale(0.9); opacity: 0.6; }
-    }
-    
-    /* --- Mensagem e UI --- */
-    .ui-element {
-        position: absolute;
-        text-align: center;
-        transition: opacity 1s ease-in-out, transform 1s ease-in-out;
-    }
-
-    #texto-inicial {
-        bottom: 15%;
-        font-size: 1.1rem;
-        letter-spacing: 1px;
-        text-shadow: 0 0 10px rgba(255,255,255,0.3);
-    }
-    
-    #mensagem-final {
-        width: 90%;
+        width: 100%;
         max-width: 500px;
+        padding: 0 1rem;
         opacity: 0;
+        transition: opacity 0.5s ease;
+        transition-delay: 2.5s;
         pointer-events: none;
-        transform: scale(0.9);
-        z-index: 20;
+        z-index: 30; /* MUDANÇA: Garante que fica na frente */
     }
-    
-    #texto-mensagem {
-        font-family: 'Cormorant Garamond', serif;
-        font-size: clamp(2rem, 5vw, 3.5rem);
-        font-weight: 600;
-        line-height: 1.3;
-        text-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
-        color: var(--text-light);
-    }
-    
-    #botoes-acao {
-        margin-top: 2rem;
-        display: flex;
-        gap: 1rem;
-        justify-content: center;
+    #main-container.aberto #botoes-acao {
+        opacity: 1;
+        pointer-events: all;
     }
 
     .botao {
-        padding: 1rem 2rem;
-        border-radius: 50px;
-        border: 1px solid var(--accent-gold);
-        background: transparent;
-        color: var(--accent-gold);
-        font-size: 1rem;
-        cursor: pointer;
+        padding: 1rem 1.5rem; border-radius: 50px;
+        border: 1px solid var(--accent-color);
+        background: rgba(17, 14, 27, 0.5);
+        backdrop-filter: blur(5px);
+        color: var(--accent-color);
+        font-size: 1rem; cursor: pointer;
         transition: background-color 0.3s, transform 0.3s;
+        white-space: nowrap;
+        flex-grow: 1; max-width: 240px;
     }
-    
-    .botao:hover {
-        background-color: rgba(255, 215, 0, 0.1);
-        transform: translateY(-3px);
+    .botao:hover { background-color: rgba(255, 255, 255, 0.1); transform: translateY(-3px); }
+    .botao.primary { background-color: var(--accent-color); color: var(--bg); }
+    .botao:disabled { opacity: 0.7; cursor: not-allowed; }
+
+    #save-feedback {
+        position: fixed; bottom: 30px;
+        background: #110E1B;
+        padding: 0.8rem 1.5rem;
+        border-radius: 20px;
+        border: 1px solid var(--accent-color);
+        box-shadow: 0 0 15px var(--glow-color);
+        opacity: 0; transform: translateY(20px);
+        transition: opacity 0.5s, transform 0.5s;
+        pointer-events: none; z-index: 200;
     }
-    
-    .botao.primary {
-        background-color: var(--accent-gold);
-        color: var(--bg);
+
+    #save-feedback.show {
+        opacity: 1;
+        transform: translateY(0);
     }
 
     /* --- ESTADOS DA ANIMAÇÃO --- */
-    .container.aberto #rolha {
-        transform: translate(-50%, -100px) rotate(30deg);
+    #main-container.aberto .tampa-bau { transform: rotateX(-140deg) translateY(-25px); }
+    #main-container.aberto #bau { transform: translateY(150%) scale(0.8); }
+    #main-container.aberto #card-container { opacity: 1; pointer-events: all; transform: scale(1); }
+    #main-container.aberto .particula-magica {
+        animation: release-particles 2s 1 forwards ease-out;
+        filter: blur(20px);
     }
-
-    .container.aberto #garrafa {
-        transform: translateY(200%) scale(0.8);
-    }
-
-    .container.aberto #texto-inicial {
-        opacity: 0;
-    }
-    
-    .container.aberto #mensagem-final {
-        opacity: 1;
-        pointer-events: all;
-        transform: scale(1);
-        transition-delay: 1s; /* Mensagem aparece depois do fumo */
-    }
-    
-    .container.aberto .particula-fumo {
-        animation-name: release-smoke;
-        animation-iteration-count: 1;
-        animation-fill-mode: forwards;
-        filter: blur(40px);
-    }
-
-    @keyframes release-smoke {
+    @keyframes release-particles {
         0% { transform: translate(0, 0) scale(1); opacity: 0.7; }
         100% { transform: translate(var(--x, 0), var(--y, 0)) scale(5); opacity: 0; }
     }
+
+    /* --- RESPONSIVIDADE --- */
+    @media (max-width: 600px) {
+        #baus { flex-direction: column; align-items: center; gap: 2.5rem; }
+        #botoes-acao { flex-direction: column; align-items: center; bottom: 20px; }
+    }
   </style>
 </head>
-<body>
+<body class="theme-sabedoria">
 
   <div id="background-glow"></div>
 
-  <div class="container" id="main-container">
+  <!-- Ícones SVG para as cartas -->
+  <svg width="0" height="0" style="position:absolute;z-index:-1;">
+    <defs>
+      <symbol id="icon-destino" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="30" stroke-width="4" />
+        <path d="M50 10 V 90 M10 50 H 90 M25 25 L 75 75 M25 75 L 75 25" stroke-width="2" />
+      </symbol>
+      <symbol id="icon-sabedoria" viewBox="0 0 100 100">
+        <path d="M50,10 C20,20 20,80 50,90 C80,80 80,20 50,10 Z" stroke-width="4" fill="none"/>
+        <circle cx="50" cy="50" r="10" stroke-width="3" />
+      </symbol>
+      <symbol id="icon-sonhos" viewBox="0 0 100 100">
+        <path d="M20,50 C40,20 60,20 80,50 C60,80 40,80 20,50 Z" stroke-width="4"/>
+      </symbol>
+      <symbol id="icon-verso" viewBox="0 0 100 100">
+          <path d="M50 10 L90 50 L50 90 L10 50 Z" stroke-width="2" fill="none"></path>
+          <circle cx="50" cy="50" r="20" stroke-width="1.5"></circle>
+      </symbol>
+    </defs>
+  </svg>
 
-    <!-- Mensagem Inicial -->
-    <p id="texto-inicial" class="ui-element">Toque na garrafa para libertar um desejo.</p>
+  <!-- TELA 1: INÍCIO -->
+  <div class="tela" id="tela-inicio">
+      <h1>Mensagens Misteriosas</h1>
+      <p>Toque para desvendar o mistério</p>
+  </div>
 
-    <!-- A Garrafa Mágica -->
-    <div id="garrafa">
-        <div id="rolha"></div>
-        <div class="corpo-garrafa">
-            <div id="fumo-container">
-                <div class="particula-fumo p1"></div>
-                <div class="particula-fumo p2"></div>
-                <div class="particula-fumo p3"></div>
+  <!-- TELA 2: SELEÇÃO -->
+  <div class="tela hidden" id="tela-selecao">
+    <h2>Escolha o seu baú</h2>
+    <div id="baus">
+        <div class="bau-selecao" data-theme="destino">
+            <div class="bau-icone theme-destino"></div>
+            <p>Baú do Destino</p>
+        </div>
+        <div class="bau-selecao" data-theme="sabedoria">
+            <div class="bau-icone theme-sabedoria"></div>
+            <p>Arca da Sabedoria</p>
+        </div>
+        <div class="bau-selecao" data-theme="sonhos">
+            <div class="bau-icone theme-sonhos"></div>
+            <p>Cofre dos Sonhos</p>
+        </div>
+    </div>
+  </div>
+
+  <!-- TELA 3: ANIMAÇÃO (SEM BOTÕES) -->
+  <div class="tela hidden" id="main-container">
+    <div id="bau">
+        <div class="tampa-bau"></div>
+        <div class="base-bau">
+            <div id="particulas-container">
+                <div class="particula-magica p1"></div>
+                <div class="particula-magica p2"></div>
+                <div class="particula-magica p3"></div>
             </div>
         </div>
     </div>
-    
-    <!-- Mensagem Final e Ações -->
-    <div id="mensagem-final" class="ui-element">
-        <p id="texto-mensagem">A sua jornada é um cometa em ascensão. Deixe um rastro de luz por onde passar.</p>
-        <div id="botoes-acao">
-            <button id="btn-reset" class="botao">Novo Desejo</button>
-            <button id="btn-save" class="botao primary">Guardar Imagem</button>
+    <div id="card-container">
+      <div id="card-inner">
+        <div class="card-face" id="card-verso">
+          <div id="verso-particles"></div>
+          <svg width="80" height="80"><use xlink:href="#icon-verso"></use></svg>
         </div>
+        <div class="card-face" id="card-frente">
+          <div id="card-icon"></div>
+          <p id="texto-mensagem"></p>
+        </div>
+      </div>
     </div>
-
   </div>
+  
+  <!-- BOTÕES E FEEDBACK (FORA DA TELA DE ANIMAÇÃO) -->
+  <div id="botoes-acao">
+      <button id="btn-reset" class="botao">Revelar Outro Mistério</button>
+      <button id="btn-save" class="botao primary">Guardar como Story</button>
+  </div>
+  <div id="save-feedback">Imagem guardada!</div>
 
   <script>
-    const mensagens = [
-        "A mesma poeira de estrela que criou galáxias existe dentro de si. Desperte o seu poder.",
-        "A sua jornada é um cometa em ascensão. Deixe um rastro de luz por onde passar.",
-        "No silêncio do cosmos, encontre a sua paz. A sua alma é uma nebulosa serena e infinita.",
-        "Não se compare com outras estrelas. Cada uma tem o seu próprio tempo e forma de brilhar.",
-        "Você é um evento cósmico raro e espetacular. Celebre a sua existência.",
-        "A gratidão é o eco que envia ao universo, e ele sempre retorna como luz.",
-        "Permita que as suas preocupações se tornem estrelas distantes: elas existem, mas não ofuscam o seu brilho.",
-        "A gravidade dos seus sonhos é a força mais poderosa do universo. Acredite nela."
-    ];
+    const mensagens = {
+      destino: [ "A mesma poeira de estrela que criou galáxias existe dentro de si. Desperte o seu poder.", "A sua bravura é um cometa em ascensão. Deixe um rastro de luz por onde passar.", "Não tema as sombras. Elas só existem porque há uma luz poderosa a brilhar: a sua.", "A gravidade dos seus sonhos é a força mais poderosa do universo. Acredite nela." ],
+      sabedoria: [ "No silêncio do cosmos, encontre a sua paz. A sua alma é uma nebulosa serena e infinita.", "Respire o universo, expire a desordem. Você é o centro da sua própria galáxia.", "Permita que as suas preocupações se tornem estrelas distantes: belas, mas que não ofuscam o seu brilho.", "A sua calma é um oceano. As ondas de hoje são a calmaria de amanhã." ],
+      sonhos: [ "A sua mente é uma galáxia de ideias. Explore cada constelação.", "Crie a sua própria realidade, pintando o vazio com as cores da sua imaginação.", "Não espere pela inspiração. Dance com a sua curiosidade e ela aparecerá.", "Cada ideia sua é uma supernova. Deixe-a explodir em algo maravilhoso." ]
+    };
 
+    const body = document.body;
+    const telaInicio = document.getElementById('tela-inicio');
+    const telaSelecao = document.getElementById('tela-selecao');
     const mainContainer = document.getElementById('main-container');
-    const garrafa = document.getElementById('garrafa');
+    
+    const baus = document.querySelectorAll('.bau-selecao');
     const textoMensagem = document.getElementById('texto-mensagem');
+    const cardIcon = document.getElementById('card-icon');
+    const cardContainer = document.getElementById('card-container');
+    const cardVerso = document.getElementById('card-verso');
+    const versoParticles = document.getElementById('verso-particles');
     const btnReset = document.getElementById('btn-reset');
     const btnSave = document.getElementById('btn-save');
-    const smokeParticles = document.querySelectorAll('.particula-fumo');
+    const saveFeedback = document.getElementById('save-feedback');
+    const magicParticles = document.querySelectorAll('.particula-magica');
+    const actionButtonsContainer = document.getElementById('botoes-acao');
 
     let isAnimating = false;
+    let sfx;
 
-    const toggleState = () => {
+    const icons = {
+      destino: '<svg><use xlink:href="#icon-destino"></use></svg>',
+      sabedoria: '<svg><use xlink:href="#icon-sabedoria"></use></svg>',
+      sonhos: '<svg><use xlink:href="#icon-sonhos"></use></svg>'
+    };
+
+    // --- LÓGICA DE SOM ---
+    const setupAudio = async () => {
+        try {
+            await Tone.start();
+            const lockSfx = new Tone.FMSynth({ harmonicity: 3, modulationIndex: 10, envelope: { attack: 0.001, decay: 0.1, sustain: 0.01, release: 0.1 }, modulationEnvelope: { attack: 0.001, decay: 0.2, sustain: 0, release: 0.2 } }).toDestination();
+            const particleSfx = new Tone.NoiseSynth({ noise: { type: 'pink' }, envelope: { attack: 0.1, decay: 1.5, sustain: 0, release: 0.2 } }).toDestination();
+            const chimeSfx = new Tone.PluckSynth({ attackNoise: 0.5, dampening: 4000, resonance: 0.9 }).toDestination();
+            const flipSfx = new Tone.NoiseSynth({ noise: { type: 'white' }, envelope: { attack: 0.01, decay: 0.1, sustain: 0, release: 0.1 } }).toDestination();
+            sfx = { lockSfx, particleSfx, chimeSfx, flipSfx };
+            console.log("Áudio pronto.");
+        } catch (e) {
+            console.error("Erro ao iniciar o áudio:", e);
+        }
+    };
+
+    // --- LÓGICA DE ESTADO E ANIMAÇÃO ---
+    const changeScreen = (screenToShow) => {
+        [telaInicio, telaSelecao, mainContainer].forEach(s => s.classList.add('hidden'));
+        screenToShow.classList.remove('hidden');
+    };
+
+    const startAnimation = (theme) => {
         if (isAnimating) return;
         isAnimating = true;
 
-        const isAberto = mainContainer.classList.contains('aberto');
+        body.className = `theme-${theme}`;
+        
+        const messagesForTheme = mensagens[theme];
+        const randomIndex = Math.floor(Math.random() * messagesForTheme.length);
+        textoMensagem.textContent = messagesForTheme[randomIndex];
+        cardIcon.innerHTML = icons[theme];
+        
+        changeScreen(mainContainer);
 
-        if (!isAberto) {
-            // Abrir
-            const randomIndex = Math.floor(Math.random() * mensagens.length);
-            textoMensagem.textContent = mensagens[randomIndex];
-            
-            // Atribuir posições aleatórias para o fumo se expandir
-            smokeParticles.forEach(p => {
+        setTimeout(() => {
+            magicParticles.forEach(p => {
                 const x = (Math.random() - 0.5) * window.innerWidth * 0.8;
                 const y = (Math.random() - 0.5) * window.innerHeight * 0.8;
                 p.style.setProperty('--x', `${x}px`);
@@ -298,40 +455,100 @@
             });
 
             mainContainer.classList.add('aberto');
-        } else {
-            // Fechar
-            mainContainer.classList.remove('aberto');
-        }
+            if (sfx) sfx.lockSfx.triggerAttackRelease("C5", "8n", Tone.now());
+            if (sfx) sfx.particleSfx.triggerAttackRelease("2n", Tone.now() + 0.2);
 
-        // Previne cliques múltiplos durante a animação
-        setTimeout(() => {
-            isAnimating = false;
-        }, 2000); // Duração da animação principal
+            setTimeout(() => {
+              cardContainer.classList.add('virado');
+              if (sfx) sfx.flipSfx.triggerAttack(Tone.now());
+              if (sfx) sfx.chimeSfx.triggerAttackRelease("G5", "2n", Tone.now() + 0.2);
+            }, 1800);
+
+        }, 100);
+
+        setTimeout(() => isAnimating = false, 3500);
+    };
+    
+    const resetAnimation = () => {
+        cardContainer.classList.remove('virado');
+        mainContainer.classList.remove('aberto');
+        setTimeout(() => changeScreen(telaSelecao), 800);
     };
 
-    garrafa.addEventListener('click', toggleState);
-    btnReset.addEventListener('click', toggleState);
+    // --- PARTÍCULAS INTERATIVAS ---
+    const createParticles = () => {
+        for(let i = 0; i < 30; i++){
+            let p = document.createElement('div');
+            p.classList.add('particle');
+            p.style.left = `${Math.random() * 100}%`;
+            p.style.top = `${Math.random() * 100}%`;
+            p.style.transform = `scale(${Math.random() * 0.5 + 0.5})`;
+            versoParticles.appendChild(p);
+        }
+    };
+
+    const handleMouseMove = (e) => {
+        const rect = cardVerso.getBoundingClientRect();
+        const x = e.clientX - rect.left - rect.width / 2;
+        const y = e.clientY - rect.top - rect.height / 2;
+        
+        const moveX = x / -15;
+        const moveY = y / -15;
+
+        versoParticles.style.transform = `translate(${moveX}px, ${moveY}px)`;
+    };
+
+    // --- EVENT LISTENERS ---
+    telaInicio.addEventListener('click', () => {
+        setupAudio();
+        changeScreen(telaSelecao);
+    }, { once: true });
+
+    baus.forEach(bau => {
+        bau.addEventListener('click', () => {
+            const theme = bau.dataset.theme;
+            startAnimation(theme);
+        });
+    });
+
+    btnReset.addEventListener('click', resetAnimation);
     
     btnSave.addEventListener('click', () => {
-        // Esconde os botões para a captura
-        const botoes = document.getElementById('botoes-acao');
-        botoes.style.display = 'none';
+        btnSave.textContent = "A guardar...";
+        btnSave.disabled = true;
 
-        html2canvas(document.body, {
-            backgroundColor: getComputedStyle(document.body).backgroundColor,
+        const cardToSave = document.getElementById('card-frente');
+
+        html2canvas(cardToSave, {
+            backgroundColor: null, // Fundo transparente
             useCORS: true,
-            scale: 2 // Melhora a resolução da imagem
+            scale: 2
         }).then(canvas => {
             const link = document.createElement('a');
-            link.download = 'desejo-etereo.png';
+            link.download = 'mensagem-misteriosa.png';
             link.href = canvas.toDataURL('image/png');
             link.click();
             
-            // Mostra os botões novamente após a captura
-            botoes.style.display = 'flex';
+            saveFeedback.classList.add('show');
+            setTimeout(() => saveFeedback.classList.remove('show'), 2000);
+            
+            setTimeout(() => {
+                btnSave.textContent = "Guardar como Story";
+                btnSave.disabled = false;
+            }, 500);
         });
     });
+    
+    cardVerso.addEventListener('mousemove', handleMouseMove);
+    cardVerso.addEventListener('mouseleave', () => {
+        versoParticles.style.transform = 'translate(0, 0)';
+    });
+    
+    // --- INICIALIZAÇÃO ---
+    createParticles();
   </script>
 </body>
 </html>
+
+
 
