@@ -225,7 +225,7 @@
     /* --- Botão de Ação --- */
     #botoes-acao {
         display: flex; justify-content: center;
-        position: fixed; /* Fixo na tela */
+        position: fixed;
         bottom: 30px;
         left: 50%;
         transform: translateX(-50%);
@@ -234,11 +234,10 @@
         padding: 0 1rem;
         opacity: 0;
         transition: opacity 0.5s ease;
-        transition-delay: 2.5s;
         pointer-events: none;
-        z-index: 30; /* Garante que fica na frente de tudo */
+        z-index: 30;
     }
-    #main-container.aberto #botoes-acao {
+    #botoes-acao.visivel {
         opacity: 1;
         pointer-events: all;
     }
@@ -376,6 +375,7 @@
     const versoParticles = document.getElementById('verso-particles');
     const btnReset = document.getElementById('btn-reset');
     const magicParticles = document.querySelectorAll('.particula-magica');
+    const actionButtonsContainer = document.getElementById('botoes-acao');
 
     let isAnimating = false;
     let sfx;
@@ -411,6 +411,7 @@
         if (isAnimating) return;
         isAnimating = true;
 
+        actionButtonsContainer.classList.remove('visivel'); // Esconde o botão
         body.className = `theme-${theme}`;
         
         const messagesForTheme = mensagens[theme];
@@ -437,6 +438,11 @@
               if (sfx) sfx.flipSfx.triggerAttack(Tone.now());
               if (sfx) sfx.chimeSfx.triggerAttackRelease("G5", "2n", Tone.now() + 0.2);
             }, 1800);
+            
+            // CORREÇÃO: Mostra o botão com um delay seguro, adicionando a classe
+            setTimeout(() => {
+                actionButtonsContainer.classList.add('visivel');
+            }, 3000);
 
         }, 100);
 
@@ -444,6 +450,7 @@
     };
     
     const resetAnimation = () => {
+        actionButtonsContainer.classList.remove('visivel'); // Esconde o botão ao reiniciar
         cardContainer.classList.remove('virado');
         mainContainer.classList.remove('aberto');
         setTimeout(() => changeScreen(telaSelecao), 800);
@@ -497,5 +504,4 @@
   </script>
 </body>
 </html>
-
 
