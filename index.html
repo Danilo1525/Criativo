@@ -7,9 +7,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Poppins:wght@300&display=swap" rel="stylesheet">
-  <!-- Bibliotecas para som e imagem -->
+  <!-- Biblioteca para som -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     :root {
       --bg: #110E1B;
@@ -223,10 +222,10 @@
       flex-grow: 1; display: flex; align-items: center;
     }
 
-    /* --- Botões e Feedback --- */
+    /* --- Botão de Ação --- */
     #botoes-acao {
-        display: flex; gap: 1rem; justify-content: center;
-        position: fixed; /* MUDANÇA: Fixo na tela */
+        display: flex; justify-content: center;
+        position: fixed; /* Fixo na tela */
         bottom: 30px;
         left: 50%;
         transform: translateX(-50%);
@@ -237,7 +236,7 @@
         transition: opacity 0.5s ease;
         transition-delay: 2.5s;
         pointer-events: none;
-        z-index: 30; /* MUDANÇA: Garante que fica na frente */
+        z-index: 30; /* Garante que fica na frente de tudo */
     }
     #main-container.aberto #botoes-acao {
         opacity: 1;
@@ -245,36 +244,17 @@
     }
 
     .botao {
-        padding: 1rem 1.5rem; border-radius: 50px;
+        padding: 1rem 2rem; border-radius: 50px;
         border: 1px solid var(--accent-color);
-        background: rgba(17, 14, 27, 0.5);
-        backdrop-filter: blur(5px);
-        color: var(--accent-color);
-        font-size: 1rem; cursor: pointer;
+        background: var(--accent-color);
+        color: var(--bg);
+        font-size: 1rem; font-weight: 600;
+        cursor: pointer;
         transition: background-color 0.3s, transform 0.3s;
         white-space: nowrap;
-        flex-grow: 1; max-width: 240px;
+        box-shadow: 0 0 20px -5px var(--accent-color);
     }
-    .botao:hover { background-color: rgba(255, 255, 255, 0.1); transform: translateY(-3px); }
-    .botao.primary { background-color: var(--accent-color); color: var(--bg); }
-    .botao:disabled { opacity: 0.7; cursor: not-allowed; }
-
-    #save-feedback {
-        position: fixed; bottom: 30px;
-        background: #110E1B;
-        padding: 0.8rem 1.5rem;
-        border-radius: 20px;
-        border: 1px solid var(--accent-color);
-        box-shadow: 0 0 15px var(--glow-color);
-        opacity: 0; transform: translateY(20px);
-        transition: opacity 0.5s, transform 0.5s;
-        pointer-events: none; z-index: 200;
-    }
-
-    #save-feedback.show {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    .botao:hover { transform: translateY(-3px) scale(1.05); }
 
     /* --- ESTADOS DA ANIMAÇÃO --- */
     #main-container.aberto .tampa-bau { transform: rotateX(-140deg) translateY(-25px); }
@@ -292,7 +272,6 @@
     /* --- RESPONSIVIDADE --- */
     @media (max-width: 600px) {
         #baus { flex-direction: column; align-items: center; gap: 2.5rem; }
-        #botoes-acao { flex-direction: column; align-items: center; bottom: 20px; }
     }
   </style>
 </head>
@@ -346,7 +325,7 @@
     </div>
   </div>
 
-  <!-- TELA 3: ANIMAÇÃO (SEM BOTÕES) -->
+  <!-- TELA 3: ANIMAÇÃO (SEM BOTÃO) -->
   <div class="tela hidden" id="main-container">
     <div id="bau">
         <div class="tampa-bau"></div>
@@ -372,12 +351,10 @@
     </div>
   </div>
   
-  <!-- BOTÕES E FEEDBACK (FORA DA TELA DE ANIMAÇÃO) -->
+  <!-- BOTÃO DE AÇÃO (FORA DA TELA DE ANIMAÇÃO) -->
   <div id="botoes-acao">
       <button id="btn-reset" class="botao">Revelar Outro Mistério</button>
-      <button id="btn-save" class="botao primary">Guardar como Story</button>
   </div>
-  <div id="save-feedback">Imagem guardada!</div>
 
   <script>
     const mensagens = {
@@ -398,10 +375,7 @@
     const cardVerso = document.getElementById('card-verso');
     const versoParticles = document.getElementById('verso-particles');
     const btnReset = document.getElementById('btn-reset');
-    const btnSave = document.getElementById('btn-save');
-    const saveFeedback = document.getElementById('save-feedback');
     const magicParticles = document.querySelectorAll('.particula-magica');
-    const actionButtonsContainer = document.getElementById('botoes-acao');
 
     let isAnimating = false;
     let sfx;
@@ -513,32 +487,6 @@
 
     btnReset.addEventListener('click', resetAnimation);
     
-    btnSave.addEventListener('click', () => {
-        btnSave.textContent = "A guardar...";
-        btnSave.disabled = true;
-
-        const cardToSave = document.getElementById('card-frente');
-
-        html2canvas(cardToSave, {
-            backgroundColor: null, // Fundo transparente
-            useCORS: true,
-            scale: 2
-        }).then(canvas => {
-            const link = document.createElement('a');
-            link.download = 'mensagem-misteriosa.png';
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-            
-            saveFeedback.classList.add('show');
-            setTimeout(() => saveFeedback.classList.remove('show'), 2000);
-            
-            setTimeout(() => {
-                btnSave.textContent = "Guardar como Story";
-                btnSave.disabled = false;
-            }, 500);
-        });
-    });
-    
     cardVerso.addEventListener('mousemove', handleMouseMove);
     cardVerso.addEventListener('mouseleave', () => {
         versoParticles.style.transform = 'translate(0, 0)';
@@ -549,6 +497,5 @@
   </script>
 </body>
 </html>
-
 
 
