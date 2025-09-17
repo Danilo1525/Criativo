@@ -14,8 +14,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
     <link rel="stylesheet" href="styles.css" />
   </head>
-  <body class="theme-sabedoria">
+  <body>
     <div id="background-glow"></div>
+    <div id="stars"></div>
 
     <!-- Ícones SVG para as cartas -->
     <svg width="0" height="0" style="position: absolute; z-index: -1">
@@ -41,6 +42,14 @@
             stroke-width="4"
           />
         </symbol>
+        <!-- NOVO ÍCONE: FORTUNA -->
+        <symbol id="icon-fortuna" viewBox="0 0 100 100">
+          <path
+            d="M50 10 L61 39 L92 42 L70 64 L75 95 L50 78 L25 95 L30 64 L8 42 L39 39 Z"
+            stroke-width="3"
+            fill="none"
+          />
+        </symbol>
         <symbol id="icon-verso" viewBox="0 0 100 100">
           <path
             d="M50 10 L90 50 L50 90 L10 50 Z"
@@ -60,7 +69,7 @@
 
     <!-- TELA 2: SELEÇÃO -->
     <div class="tela hidden" id="tela-selecao">
-      <h2>Escolha o seu baú</h2>
+      <h2>Escolha a sua inspiração</h2>
       <div id="baus">
         <div class="bau-selecao" data-theme="destino">
           <div class="bau-icone theme-destino"></div>
@@ -74,10 +83,15 @@
           <div class="bau-icone theme-sonhos"></div>
           <p>Cofre dos Sonhos</p>
         </div>
+        <!-- NOVO BAÚ: FORTUNA -->
+        <div class="bau-selecao" data-theme="fortuna">
+          <div class="bau-icone theme-fortuna"></div>
+          <p>Tesouro da Fortuna</p>
+        </div>
       </div>
     </div>
 
-    <!-- TELA 3: ANIMAÇÃO (SEM BOTÃO) -->
+    <!-- TELA 3: ANIMAÇÃO -->
     <div class="tela hidden" id="main-container">
       <div id="bau">
         <div class="tampa-bau"></div>
@@ -105,11 +119,10 @@
       </div>
     </div>
 
-    <!-- BOTÃO DE AÇÃO (FORA DA TELA DE ANIMAÇÃO) -->
+    <!-- BOTÃO DE AÇÃO -->
     <div id="botoes-acao">
       <button id="btn-reset" class="botao">Revelar Outro Mistério</button>
     </div>
-
     <script src="script.js"></script>
   </body>
 </html>
